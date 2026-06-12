@@ -1,0 +1,16 @@
+{
+  "id": "permissions-claude",
+  "created_at": "2026-06-10T16:25:30.18469Z",
+  "root_dir": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.jr-stack\\backups\\permissions-claude",
+  "entries": [
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.claude\\settings.json",
+      "snapshot_path": "files/Users/lisan/OneDrive/Escritorio/UTN/Gestion-Metodologia-2026/active-trace/.claude/settings.json",
+      "existed": true,
+      "mode": 438
+    }
+  ],
+  "file_count": 1,
+  "compressed": true,
+  "checksum": "02a4cd29a5db98e6ed7afacd3c171302ae80223acca1d7ba118da3c581b389e3"
+}

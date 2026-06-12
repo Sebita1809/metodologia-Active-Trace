@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash(go test:*)",
+      "Bash(go build:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)"
+    ],
+    "defaultMode": "default",
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(git push --force:*)",
+      "Bash(sudo rm -rf /)",
+      "Bash(sudo rm -rf ~)",
+      "Edit(.env)",
+      "Edit(.env.*)"
+    ]
+  }
+}
