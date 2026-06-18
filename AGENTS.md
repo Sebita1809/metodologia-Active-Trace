@@ -114,17 +114,18 @@ Estas reglas son **contrato**. Romperlas es un defecto, no una decisión de esti
 5. **Pydantic schemas con `extra='forbid'`.** Todo schema rechaza campos no declarados (`model_config = ConfigDict(extra='forbid')`).
 6. **snake_case en Python.** Funciones, variables, columnas de BD, módulos y paquetes.
 7. **PascalCase en componentes React.** Nombre del componente y del archivo (`ProductCard.tsx`). Sin `any`, sin class components.
+8. **Usar pnpm en lugar de npm.** Toda instalación de paquetes, dependencias o ejecución de scripts del frontend debe hacerse con `pnpm`. No usar `npm install`, `npm run`, `npx` ni similares.
 
 ### Seguridad y arquitectura (fundacionales — fallan en code review)
-8. **Identidad SIEMPRE desde la sesión** (JWT verificado). JAMÁS desde un parámetro de URL, body, header ni cualquier dato de la petición. Esto define quién es el usuario, sus roles y su tenant. Sin excepciones.
-9. **Multi-tenancy row-level.** `tenant_id` en cada tabla; los repositories filtran por tenant **por defecto**. Un query sin scope de tenant es un bug que falla en code review.
-10. **RBAC fino `modulo:accion`**, no flags binarios ni superusuario. Cada endpoint declara `require_permission(...)`. **Fail-closed**: sin permiso explícito → 403.
-11. **Nunca lógica de negocio en Routers.** Nunca acceso directo a DB desde Services (siempre vía Repository). Flujo unidireccional Routers → Services → Repositories → Models.
-12. **Secretos y PII (CBU, DNI) SIEMPRE AES-256.** Passwords con Argon2id. Nunca texto plano.
-13. **Soft delete siempre** (auditoría append-only). Nunca hard delete.
-14. **Identidad por UUID interno.** El legajo es un atributo de negocio, nunca credencial ni selector de sesión.
-15. **≤500 LOC por archivo backend**, componentes React <200 LOC. Una migración Alembic por cambio de schema.
-16. **Cobertura mínima**: ≥80% líneas, ≥90% reglas de negocio. **Strict TDD**: test que falla → código mínimo → triangulación → refactor.
+9. **Identidad SIEMPRE desde la sesión** (JWT verificado). JAMÁS desde un parámetro de URL, body, header ni cualquier dato de la petición. Esto define quién es el usuario, sus roles y su tenant. Sin excepciones.
+10. **Multi-tenancy row-level.** `tenant_id` en cada tabla; los repositories filtran por tenant **por defecto**. Un query sin scope de tenant es un bug que falla en code review.
+11. **RBAC fino `modulo:accion`**, no flags binarios ni superusuario. Cada endpoint declara `require_permission(...)`. **Fail-closed**: sin permiso explícito → 403.
+12. **Nunca lógica de negocio en Routers.** Nunca acceso directo a DB desde Services (siempre vía Repository). Flujo unidireccional Routers → Services → Repositories → Models.
+13. **Secretos y PII (CBU, DNI) SIEMPRE AES-256.** Passwords con Argon2id. Nunca texto plano.
+14. **Soft delete siempre** (auditoría append-only). Nunca hard delete.
+15. **Identidad por UUID interno.** El legajo es un atributo de negocio, nunca credencial ni selector de sesión.
+16. **≤500 LOC por archivo backend**, componentes React <200 LOC. Una migración Alembic por cambio de schema.
+17. **Cobertura mínima**: ≥80% líneas, ≥90% reglas de negocio. **Strict TDD**: test que falla → código mínimo → triangulación → refactor.
 
 ---
 
