@@ -22,13 +22,17 @@ The system SHALL define a `Tenant` model as the root aggregate of the multi-tena
 - **WHEN** an active tenant is deactivated
 - **THEN** its `estado` changes to `Inactivo`
 
-### Requirement: Tenant context resolution
-The system SHALL provide a mechanism to resolve the current tenant context per request.
+### Requirement: Tenant context resolution from JWT
+The system SHALL provide a mechanism to resolve the current tenant context per request. The tenant SHALL be extracted exclusively from a verified JWT access token, not from any request header.
 
-#### Scenario: Tenant resolution from development header
-- **WHEN** a request includes `X-Tenant-ID` header in development mode
-- **THEN** the system resolves the tenant UUID from that header
+#### Scenario: Tenant resolution from verified JWT
+- **WHEN** an authenticated request is processed
+- **THEN** the `get_tenant_context` function reads `tenant_id` from the claims of the verified JWT access token
 
-#### Scenario: Tenant resolution falls to default
-- **WHEN** no `X-Tenant-ID` header is present in development mode
-- **THEN** the system uses a default tenant for local development
+#### Scenario: Missing tenant claim in JWT is rejected
+- **WHEN** a JWT access token lacks the `tenant_id` claim
+- **THEN** the system raises a 401 Unauthorized and does not process the request
+
+#### Scenario: Development fallback via test JWT
+- **WHEN** a request is made in development mode without a valid JWT
+- **THEN** the system returns 401 Unauthorized; development environments SHALL use a pre-issued test JWT instead of header-based tenant resolution

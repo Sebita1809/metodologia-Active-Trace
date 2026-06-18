@@ -4,9 +4,12 @@ Required env vars for all integration tests:
     DATABASE_URL, SECRET_KEY, ENCRYPTION_KEY
 """
 
+import asyncio
 import os
+import sys
 from collections.abc import AsyncGenerator
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
@@ -14,12 +17,30 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.tenant import Tenant
 
+
+# ── Windows ProactorEventLoop + asyncpg workaround ────────────
+# pytest-asyncio creates a new event loop per function by default.
+# On Windows the ProactorEventLoop does not release asyncpg pool
+# connections correctly when the loop is closed, causing
+# "Event loop is closed" errors on subsequent tests.  We override
+# the event_loop fixture to be session-scoped with the stable
+# SelectorEventLoopPolicy.
+
+if sys.platform == "win32":
+
+    @pytest.fixture(scope="session")
+    def event_loop() -> asyncio.AbstractEventLoop:
+        policy = asyncio.WindowsSelectorEventLoopPolicy()
+        loop = policy.new_event_loop()
+        yield loop
+        loop.close()
+
 # ── Ensure required env vars are present for any test that
 #    triggers the app (health, startup, DB) ────────────────
 _TEST_ENV = {
     "DATABASE_URL": os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://test:test@localhost:5432/test",
+        "postgresql+asyncpg://activia:activia_secret@localhost:5440/activia_trace",
     ),
     "SECRET_KEY": os.getenv("SECRET_KEY", "a" * 32),
     "ENCRYPTION_KEY": os.getenv("ENCRYPTION_KEY", "b" * 32),

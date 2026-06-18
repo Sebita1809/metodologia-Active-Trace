@@ -9,6 +9,9 @@ services:
       - ./backend/.env
     environment:
       DATABASE_URL: postgresql+asyncpg://activia:activia_secret@postgres:5432/activia_trace
+    volumes:
+      - ./backend/app:/app/app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       postgres:
         condition: service_healthy

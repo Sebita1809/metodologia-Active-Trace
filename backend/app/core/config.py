@@ -46,6 +46,23 @@ class Settings(BaseSettings):
         description="JWT access token lifetime in minutes",
     )
 
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(
+        default=7,
+        ge=1,
+        description="Refresh token lifetime in days",
+    )
+
+    TOTP_ISSUER: str = Field(
+        default="activia-trace",
+        description="Issuer name for TOTP QR codes",
+    )
+
+    RECOVERY_TOKEN_EXPIRE_MINUTES: int = Field(
+        default=15,
+        ge=1,
+        description="Password recovery token lifetime in minutes",
+    )
+
     # ── OpenTelemetry (optional) ──────────────────────────────
     OTEL_SERVICE_NAME: str | None = Field(
         default=None,
