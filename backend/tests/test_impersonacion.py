@@ -194,7 +194,8 @@ class TestImpersonacion:
             # Verify audit log entry
             result = await db_session.execute(
                 select(AuditLog).where(
-                    AuditLog.accion == AuditAction.IMPERSONACION_INICIAR.value
+                    AuditLog.accion == AuditAction.IMPERSONACION_INICIAR.value,
+                    AuditLog.actor_id == admin_id,
                 )
             )
             entry = result.scalar_one()
@@ -229,7 +230,8 @@ class TestImpersonacion:
 
         result = await db_session.execute(
             select(AuditLog).where(
-                AuditLog.accion == AuditAction.IMPERSONACION_FINALIZAR.value
+                AuditLog.accion == AuditAction.IMPERSONACION_FINALIZAR.value,
+                AuditLog.actor_id == actor_id,
             )
         )
         entry = result.scalar_one()
