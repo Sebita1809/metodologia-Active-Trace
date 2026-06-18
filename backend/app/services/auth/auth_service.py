@@ -4,6 +4,8 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from uuid import UUID
 
+import hmac
+
 from argon2 import PasswordHasher
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -12,6 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.security import create_access_token, create_refresh_token
 from app.models.auth_user import AuthUser
+from app.models.domain.asignacion import Asignacion
+from app.models.domain.usuario import Usuario
 from app.models.refresh_token import RefreshToken
 from app.repositories.refresh_token_repo import RefreshTokenRepository
 
@@ -54,10 +58,35 @@ class AuthService:
     async def create_session(
         self, user: AuthUser
     ) -> tuple[str, str, RefreshToken]:
+        key = get_settings().ENCRYPTION_KEY.encode("utf-8")
+        normalized = user.email.lower().strip().encode("utf-8")
+        email_hash = hmac.new(key, normalized, sha256).hexdigest()
+
+        usuario_stmt = select(Usuario).where(
+            Usuario.tenant_id == user.tenant_id,
+            Usuario.email_hash == email_hash,
+            Usuario.deleted_at.is_(None),
+        )
+        usuario_result = await self.db.execute(usuario_stmt)
+        usuario = usuario_result.scalar_one_or_none()
+
+        roles: list[str] = []
+        if usuario is not None:
+            roles_stmt = (
+                select(Asignacion.rol)
+                .where(
+                    Asignacion.usuario_id == usuario.id,
+                    Asignacion.deleted_at.is_(None),
+                )
+                .distinct()
+            )
+            roles_result = await self.db.execute(roles_stmt)
+            roles = [row[0] for row in roles_result.all()]
+
         access_token = create_access_token(
             user_id=str(user.id),
             tenant_id=str(user.tenant_id),
-            roles=[],
+            roles=roles,
         )
         refresh_token_str = create_refresh_token()
         token_hash = sha256(refresh_token_str.encode()).hexdigest()
@@ -120,10 +149,35 @@ class AuthService:
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
 
+        key = get_settings().ENCRYPTION_KEY.encode("utf-8")
+        normalized = user.email.lower().strip().encode("utf-8")
+        email_hash = hmac.new(key, normalized, sha256).hexdigest()
+
+        usuario_stmt = select(Usuario).where(
+            Usuario.tenant_id == user.tenant_id,
+            Usuario.email_hash == email_hash,
+            Usuario.deleted_at.is_(None),
+        )
+        usuario_result = await self.db.execute(usuario_stmt)
+        usuario = usuario_result.scalar_one_or_none()
+
+        roles: list[str] = []
+        if usuario is not None:
+            roles_stmt = (
+                select(Asignacion.rol)
+                .where(
+                    Asignacion.usuario_id == usuario.id,
+                    Asignacion.deleted_at.is_(None),
+                )
+                .distinct()
+            )
+            roles_result = await self.db.execute(roles_stmt)
+            roles = [row[0] for row in roles_result.all()]
+
         access_token = create_access_token(
             user_id=str(user.id),
             tenant_id=str(user.tenant_id),
-            roles=[],
+            roles=roles,
         )
         return access_token, new_refresh_str, new_token
 

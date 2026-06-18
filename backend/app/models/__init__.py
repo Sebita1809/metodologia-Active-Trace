@@ -9,9 +9,10 @@ from app.models.rol import Rol
 from app.models.permiso import Permiso
 from app.models.audit_log import AuditLog
 from app.models.rol_permiso import RolPermiso
-from app.models.domain import Carrera, Cohorte, Materia
+from app.models.domain import Asignacion, Carrera, Cohorte, Materia, Usuario
 
 __all__ = [
+    "Asignacion",
     "BaseModel",
     "Tenant",
     "TenantEstado",
@@ -25,4 +26,5 @@ __all__ = [
     "Carrera",
     "Cohorte",
     "Materia",
+    "Usuario",
 ]
