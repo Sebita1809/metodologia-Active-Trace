@@ -47,24 +47,52 @@ def create_access_token(
     tenant_id: str,
     roles: list[str],
     expires_delta: timedelta | None = None,
+    impersonated_user_id: str | None = None,
+    actor_id: str | None = None,
 ) -> str:
     if expires_delta is None:
         expires_delta = timedelta(
             minutes=get_settings().ACCESS_TOKEN_EXPIRE_MINUTES
         )
     now = datetime.now(tz=timezone.utc)
+    token_type = "impersonation" if impersonated_user_id else "access"
     payload: dict[str, Any] = {
         "sub": user_id,
         "tenant_id": tenant_id,
         "roles": roles,
         "iat": now,
         "exp": now + expires_delta,
-        "type": "access",
+        "type": token_type,
     }
+    if impersonated_user_id:
+        payload["actor_id"] = actor_id
+        payload["impersonated_user_id"] = impersonated_user_id
     return jwt.encode(
         payload,
         get_settings().SECRET_KEY,
         algorithm="HS256",
+    )
+
+
+def create_impersonation_token(
+    actor_id: str,
+    impersonated_user_id: str,
+    tenant_id: str,
+    roles: list[str],
+    expires_delta: timedelta | None = None,
+) -> str:
+    """Create an impersonation JWT.
+
+    The token identifies the impersonated user as the current user (sub),
+    while preserving the real actor_id for audit purposes.
+    """
+    return create_access_token(
+        user_id=impersonated_user_id,
+        tenant_id=tenant_id,
+        roles=roles,
+        expires_delta=expires_delta,
+        impersonated_user_id=impersonated_user_id,
+        actor_id=actor_id,
     )
 
 

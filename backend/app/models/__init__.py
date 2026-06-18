@@ -5,6 +5,10 @@ from app.models.tenant import Tenant, TenantEstado
 from app.models.auth_user import AuthUser
 from app.models.refresh_token import RefreshToken
 from app.models.password_recovery_token import PasswordRecoveryToken
+from app.models.rol import Rol
+from app.models.permiso import Permiso
+from app.models.audit_log import AuditLog
+from app.models.rol_permiso import RolPermiso
 
 __all__ = [
     "BaseModel",
@@ -13,4 +17,8 @@ __all__ = [
     "AuthUser",
     "RefreshToken",
     "PasswordRecoveryToken",
+    "Rol",
+    "Permiso",
+    "RolPermiso",
+    "AuditLog",
 ]
