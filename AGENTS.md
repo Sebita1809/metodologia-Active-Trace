@@ -82,7 +82,7 @@ Cargá la skill correspondiente al contexto **ANTES** de escribir código. Aplic
 | **Backend Aux** | Servicios, integraciones, seguridad, performance | `api-security-best-practices`, `postgresql-optimization`, `systematic-debugging` |
 | **Frontend** | React / TanStack / Tailwind / E2E | `typescript-advanced-types`, `tailwind-design-system`, `playwright-best-practices` |
 | **DevOps** | Contenedores / build | `multi-stage-dockerfile` |
-| **Transversal** | Calidad / revisión | `code-review-excellence`, `systematic-debugging` |
+| **Transversal** | Calidad / revisión | `code-review-skill`, `systematic-debugging` |
 | **Orquestación** | SDD / OPSX / docs | `kb-creator`, `roadmap-generator`, `agent-instruction`, `find-skill` |
 
 > **Gap conocido**: no hay skill de buenas prácticas React instalada (`vercel-react-best-practices` recomendada pero NO instalada por decisión del usuario). El stack queda cubierto ~100% por las skills preinstaladas.
@@ -142,15 +142,45 @@ Antes de cualquier acción no trivial: identificá el nivel de governance del do
 
 ---
 
+## Orquestación con Subagentes
+
+Si actuás como **agente orquestador** (coordinando múltiples skills, fases o agents), **SIEMPRE delegá el trabajo pesado a subagentes** vía `task()`. No acumulés contexto innecesario — delegá:
+
+| Qué hacer | Cómo |
+|-----------|------|
+| Leer 4+ archivos para explorar | `task()` con agente `explore` |
+| Escribir código multi-file | `task()` con agente `general` |
+| Correr tests, builds, instalaciones | `task()` con agente `general` |
+| Investigar decisiones pasadas | `task()` con agente `explore` |
+
+Viceversa: si NO sos el orquestador (sos un subagente ejecutando una tarea concreta), **no delegués**. Ejecutá directamente.
+
+---
+
+## Cierre de Sesión
+
+Cuando el usuario diga **"cierro sesión"**, "listo", "chau", "hasta luego" o similar:
+
+1. Ejecutá el **protocolo de cierre de Engram** completo:
+   - `mem_save` de decisiones/discoveries pendientes
+   - `mem_session_summary` con lo que se hizo en la sesión
+   - `engram sync` para versionar la memoria en el repo
+   - `git add .engram` + `git commit -m "chore(engram): sync session memory"` (sin push a menos que lo pida)
+2. Luego despedite normal.
+
+---
+
 ## Flujo de Trabajo
 
 ```
-1. Leer la KB relevante (knowledge-base/) + docs/ARQUITECTURA.md   → entender el dominio
-2. Identificar el change en CHANGES.md (C-NN) + sus dependencias    → respetar gates
-3. Verificar el nivel de governance del dominio                    → CRÍTICO = propuesta primero
-4. /opsx:propose C-NN-nombre                                        → proposal + design + specs + tasks
-5. Implementar las tasks (cargando skills, Strict TDD)             → respetando las reglas duras
-6. /opsx:archive C-NN-nombre + marcar [x] en CHANGES.md            → cerrar el change
+0. [Orquestador] Delegar trabajo pesado a subagentes via task()       → no inflar contexto
+1. Leer la KB relevante (knowledge-base/) + docs/ARQUITECTURA.md     → entender el dominio
+2. Identificar el change en CHANGES.md (C-NN) + sus dependencias      → respetar gates
+3. Verificar el nivel de governance del dominio                      → CRÍTICO = propuesta primero
+4. /opsx:propose C-NN-nombre                                          → proposal + design + specs + tasks
+5. Implementar las tasks (cargando skills, Strict TDD)               → respetando las reglas duras
+6. /opsx:archive C-NN-nombre + marcar [x] en CHANGES.md              → cerrar el change
+7. "Cierro sesión" → protocolo de cierre completo (engram sync + commit)
 ```
 
 Aplicá TODAS las reglas duras en cada paso. Ante conflicto entre la KB y este archivo, las reglas duras prevalecen.

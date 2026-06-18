@@ -9,7 +9,10 @@ from collections.abc import AsyncGenerator
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.tenant import Tenant
 
 # ── Ensure required env vars are present for any test that
 #    triggers the app (health, startup, DB) ────────────────
@@ -52,3 +55,27 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
+
+
+@pytest_asyncio.fixture
+async def tenant_a(db_session: AsyncSession) -> Tenant:
+    """Create tenant A for isolation tests (7.1)."""
+    await db_session.execute(text("DELETE FROM tenant WHERE codigo = 'TENANT_A'"))
+    await db_session.commit()
+    tenant = Tenant(nombre="Tenant A", codigo="TENANT_A")
+    db_session.add(tenant)
+    await db_session.commit()
+    await db_session.refresh(tenant)
+    return tenant
+
+
+@pytest_asyncio.fixture
+async def tenant_b(db_session: AsyncSession) -> Tenant:
+    """Create tenant B for isolation tests (7.1)."""
+    await db_session.execute(text("DELETE FROM tenant WHERE codigo = 'TENANT_B'"))
+    await db_session.commit()
+    tenant = Tenant(nombre="Tenant B", codigo="TENANT_B")
+    db_session.add(tenant)
+    await db_session.commit()
+    await db_session.refresh(tenant)
+    return tenant

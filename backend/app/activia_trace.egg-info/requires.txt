@@ -7,6 +7,7 @@ pydantic<3.0,>=2.10
 pydantic-settings<3.0,>=2.7
 argon2-cffi<24.0,>=23.1
 python-jose[cryptography]<4.0,>=3.3
+cryptography<44.0,>=43.0
 opentelemetry-api<2.0,>=1.29
 opentelemetry-sdk<2.0,>=1.29
 opentelemetry-instrumentation-fastapi<1.0,>=0.50b
