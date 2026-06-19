@@ -327,9 +327,10 @@ class TestAsignacionMasiva:
         user1 = await _crear_usuario(async_client, headers, "activo")
         user2 = await _crear_usuario(async_client, headers, "inactivo")
 
-        await async_client.delete(
+        response = await async_client.delete(
             f"{USUARIOS_BASE}/{user2['id']}", headers=headers
         )
+        assert response.status_code == 204, f"Expected 204, got {response.status_code}: {response.text}"
 
         payload = {
             "materia_id": materia["id"],

@@ -39,7 +39,7 @@ async def _protected_endpoint(
     return {"status": "ok", "user_id": str(current_user.user_id)}
 
 
-_existing_paths = {r.path for r in app.routes}
+_existing_paths = {r.path for r in app.routes if hasattr(r, 'path')}
 if "/api/v1/test-rbac/protected" not in _existing_paths:
     app.include_router(_test_router)
 
@@ -73,9 +73,9 @@ class TestSeedData:
             "FINANZAS",
         }
 
-    async def test_seed_has_19_permissions(self, db_session: AsyncSession) -> None:
-        """WHEN all permissions are queried THEN 19 permission codes exist."""
-        result = await db_session.execute(text("SELECT codigo FROM permiso"))
+    async def test_seed_has_20_permissions(self, db_session: AsyncSession) -> None:
+        """WHEN all permissions are queried THEN 20 permission codes exist (seed from 003 + 007)."""
+        result = await db_session.execute(text("SELECT codigo FROM permiso WHERE deleted_at IS NULL"))
         perm_codes = {row[0] for row in result.all()}
         expected = {
             "calificaciones:importar",
@@ -97,6 +97,7 @@ class TestSeedData:
             "salarios:gestionar",
             "configuracion:gestionar",
             "impersonacion:usar",
+            "padron:importar",
         }
         assert perm_codes == expected
 
@@ -467,29 +468,33 @@ class TestUniquenessConstraints:
         )
         admin_rol_id = result.scalar_one()
 
-        result = await db_session.execute(
-            text(
-                "SELECT id FROM permiso WHERE codigo = 'calificaciones:importar' LIMIT 1"
-            )
-        )
-        perm_id = result.scalar_one()
-
-        rp1 = RolPermiso(rol_id=admin_rol_id, permiso_id=perm_id)
-        db_session.add(rp1)
+        # Use a UUID suffix to avoid collisions from previous test runs
+        suffix = uuid.uuid4().hex[:8]
+        codigo = f"test:dup_{suffix}"
+        temp_perm = Permiso(codigo=codigo, modulo="test", accion="duplicate")
+        db_session.add(temp_perm)
         await db_session.commit()
+        await db_session.refresh(temp_perm)
+        temp_perm_id = temp_perm.id  # save before any rollback to avoid MissingGreenlet
 
         try:
-            rp2 = RolPermiso(rol_id=admin_rol_id, permiso_id=perm_id)
+            rp1 = RolPermiso(rol_id=admin_rol_id, permiso_id=temp_perm_id)
+            db_session.add(rp1)
+            await db_session.commit()
+
+            rp2 = RolPermiso(rol_id=admin_rol_id, permiso_id=temp_perm_id)
             db_session.add(rp2)
             with pytest.raises(IntegrityError):
                 await db_session.commit()
             await db_session.rollback()
         finally:
             await db_session.execute(
-                text(
-                    "DELETE FROM rol_permiso WHERE rol_id = :rid AND permiso_id = :pid"
-                ),
-                {"rid": admin_rol_id, "pid": perm_id},
+                text("DELETE FROM rol_permiso WHERE permiso_id = :pid"),
+                {"pid": temp_perm_id},
+            )
+            await db_session.execute(
+                text("DELETE FROM permiso WHERE id = :pid"),
+                {"pid": temp_perm_id},
             )
             await db_session.commit()
 

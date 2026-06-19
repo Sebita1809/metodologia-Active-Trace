@@ -64,7 +64,7 @@ class TestSettingsInvalidEnv:
         # DATABASE_URL is NOT set
 
         with pytest.raises(ValidationError):
-            Settings()
+            Settings(_env_file=None)  # Don't read .env which has DATABASE_URL
 
     def test_invalid_type(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """WHEN a var has invalid type THEN Settings raises ValidationError."""

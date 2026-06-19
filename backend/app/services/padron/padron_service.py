@@ -214,13 +214,13 @@ class PadronService:
 
     def _version_to_response(self, v: VersionPadron, total_entradas: int | None = None) -> dict:
         return {
-            "id": v.id,
-            "tenant_id": v.tenant_id,
-            "materia_id": v.materia_id,
-            "cohorte_id": v.cohorte_id,
+            "id": str(v.id),
+            "tenant_id": str(v.tenant_id),
+            "materia_id": str(v.materia_id),
+            "cohorte_id": str(v.cohorte_id),
             "activa": v.activa,
             "origen": v.origen,
-            "cargado_por": v.cargado_por,
+            "cargado_por": str(v.cargado_por),
             "cargado_at": v.cargado_at,
             "total_entradas": total_entradas,
             "created_at": v.created_at,
@@ -229,9 +229,9 @@ class PadronService:
 
     def _entrada_to_response(self, e) -> dict:
         return {
-            "id": e.id,
-            "version_id": e.version_id,
-            "usuario_id": e.usuario_id,
+            "id": str(e.id),
+            "version_id": str(e.version_id),
+            "usuario_id": str(e.usuario_id) if e.usuario_id else None,
             "nombre": e.nombre,
             "apellidos": e.apellidos,
             "email": e.email,

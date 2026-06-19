@@ -2,7 +2,7 @@
 
 import uuid
 from io import BytesIO
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -14,6 +14,7 @@ from app.core.audit_codes import AuditAction
 from app.integrations.moodle_ws import MoodleConnectionError, MoodleWSClient
 from app.models.audit_log import AuditLog
 from app.models.domain.asignacion import Asignacion
+from app.models.domain.cohorte import Cohorte
 from app.models.domain.materia import Materia
 from app.models.domain.version_padron import VersionPadron
 from app.models.tenant import Tenant
@@ -378,7 +379,7 @@ class TestMoodleSync:
         with patch("httpx.AsyncClient") as mock_client_cls:
             mock_instance = AsyncMock()
             mock_client_cls.return_value.__aenter__.return_value = mock_instance
-            mock_response = AsyncMock()
+            mock_response = MagicMock()
             mock_response.status_code = 200
             mock_response.json.return_value = [
                 {
@@ -486,16 +487,20 @@ class TestMoodleSync:
             assert exc.value.status_code == 502
 
     async def test_moodle_retry_succeeds(self):
-        call_count = 0
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            mock_instance = AsyncMock()
+            mock_client_cls.return_value.__aenter__.return_value = mock_instance
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = [
+                {"id": 1, "firstname": "Retry", "lastname": "User", "email": "retry@test.com"},
+            ]
+            mock_instance.post.side_effect = [
+                httpx.ConnectError("Timeout"),
+                httpx.ConnectError("Timeout"),
+                mock_response,
+            ]
 
-        async def _mock_call(self_fn, function, params=None):
-            nonlocal call_count
-            call_count += 1
-            if call_count < 3:
-                raise httpx.ConnectError("Timeout")
-            return [{"id": 1, "firstname": "Retry", "lastname": "User", "email": "retry@test.com"}]
-
-        with patch.object(MoodleWSClient, "_call", _mock_call):
             client = MoodleWSClient(
                 ws_url="https://moodle.test/ws",
                 ws_token="token",
@@ -505,13 +510,14 @@ class TestMoodleSync:
             result = await client.get_enrolled_users(1)
             assert len(result) == 1
             assert result[0]["email"] == "retry@test.com"
-            assert call_count == 3
+            assert mock_instance.post.call_count == 3
 
     async def test_moodle_retry_all_fail(self):
-        async def _mock_fail(self_fn, function, params=None):
-            raise httpx.ConnectError("Always fails")
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            mock_instance = AsyncMock()
+            mock_client_cls.return_value.__aenter__.return_value = mock_instance
+            mock_instance.post.side_effect = httpx.ConnectError("Always fails")
 
-        with patch.object(MoodleWSClient, "_call", _mock_fail):
             client = MoodleWSClient(
                 ws_url="https://moodle.test/ws",
                 ws_token="token",
@@ -614,7 +620,7 @@ class TestClearAndRBAC:
             entradas=[{"nombre": "Coord", "apellidos": "Test", "email": "coord@test.com"}],
         )
         assert result["id"] is not None
-        assert result["materia_id"] == materia_create.id
+        assert uuid.UUID(result["materia_id"]) == materia_create.id
 
     async def test_profesor_clear_propia_materia(
         self,

@@ -1,10 +1,13 @@
 """Domain service for teaching team operations."""
+from datetime import datetime
 import uuid
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import EstadoGenerico
+from app.repositories.estructura.cohorte_repository import CohorteRepository
+from app.repositories.estructura.materia_repository import MateriaRepository
 from app.repositories.usuarios.asignacion_repository import AsignacionRepository
 from app.repositories.usuarios.umbral_materia_repository import UmbralMateriaRepository
 from app.repositories.usuarios.usuario_repository import UsuarioRepository
@@ -20,12 +23,17 @@ class EquipoDocenteService:
         self.repo = AsignacionRepository(db, tenant_id)
         self.usuario_repo = UsuarioRepository(db, tenant_id)
         self.umbral_repo = UmbralMateriaRepository(db, tenant_id)
+        self.materia_repo = MateriaRepository(db, tenant_id)
+        self.cohorte_repo = CohorteRepository(db, tenant_id)
 
     async def get_mis_equipos(self, usuario_id: uuid.UUID) -> list[dict]:
         entities = await self.repo.list_vigentes_por_usuario(usuario_id)
         return [self._to_response(e) for e in entities]
 
     async def get_equipo_por_materia(self, materia_id: uuid.UUID, cohorte_id: uuid.UUID | None = None) -> list[dict]:
+        materia = await self.materia_repo.get(materia_id)
+        if materia is None:
+            raise HTTPException(status_code=404, detail="Materia not found")
         entities = await self.repo.list_vigentes_por_materia_y_cohorte(materia_id, cohorte_id)
         return [self._to_response(e) for e in entities]
 
@@ -35,7 +43,11 @@ class EquipoDocenteService:
         cohorte_id = data.get("cohorte_id")
         rol = data["rol"]
         desde = data["desde"]
+        if isinstance(desde, str):
+            desde = datetime.strptime(desde, "%Y-%m-%d").date()
         hasta = data.get("hasta")
+        if hasta and isinstance(hasta, str):
+            hasta = datetime.strptime(hasta, "%Y-%m-%d").date()
         usuario_ids = data["usuario_ids"]
         comisiones = data.get("comisiones") or []
         responsable_id = data.get("responsable_id")
@@ -86,10 +98,18 @@ class EquipoDocenteService:
         cohorte_origen_id = data["cohorte_origen_id"]
         cohorte_destino_id = data["cohorte_destino_id"]
         desde = data["desde"]
+        if isinstance(desde, str):
+            desde = datetime.strptime(desde, "%Y-%m-%d").date()
         hasta = data.get("hasta")
+        if hasta and isinstance(hasta, str):
+            hasta = datetime.strptime(hasta, "%Y-%m-%d").date()
 
         if cohorte_origen_id == cohorte_destino_id:
             raise HTTPException(status_code=422, detail="Origin and destination cohorts must be different")
+
+        cohorte_destino = await self.cohorte_repo.get(cohorte_destino_id)
+        if cohorte_destino is None:
+            raise HTTPException(status_code=404, detail="Destination cohort not found")
 
         origen = await self.repo.list_vigentes_por_materia_y_cohorte(materia_id, cohorte_origen_id)
         if not origen:

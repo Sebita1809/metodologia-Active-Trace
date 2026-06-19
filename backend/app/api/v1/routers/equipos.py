@@ -2,7 +2,8 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query, status
-from fastapi.responses import StreamingResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_codes import AuditAction
@@ -55,7 +56,7 @@ async def asignacion_masiva(
     return result
 
 
-@router.post("/clonar", status_code=status.HTTP_201_CREATED)
+@router.post("/clonar")
 async def clonar_equipo(
     body: dict,
     current_user: UserContext = Depends(get_current_user),
@@ -64,6 +65,7 @@ async def clonar_equipo(
 ):
     service = EquipoDocenteService(db, current_user.tenant_id)
     result = await service.clonar_equipo(body)
+    creadas = result["creadas"]
     await audit_record(
         db, current_user.user_id, AuditAction.ASIGNACION_MODIFICAR,
         tenant_id=current_user.tenant_id,
@@ -75,7 +77,7 @@ async def clonar_equipo(
             "conteo": result["conteo"],
         },
     )
-    return result
+    return JSONResponse(content=jsonable_encoder(creadas), status_code=200 if len(creadas) == 0 else 201)
 
 
 @router.patch("/vigencia")

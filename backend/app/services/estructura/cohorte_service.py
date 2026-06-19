@@ -59,6 +59,14 @@ class CohorteService:
                     status_code=422, detail="New carrera not found or not active"
                 )
 
+        if "estado" in data and data["estado"] == "Inactiva":
+            active = await self.asignacion_repo.tiene_asignaciones_activas_cohorte(id)
+            if active:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Cannot deactivate cohorte with active asignaciones",
+                )
+
         return await self.repo.update(id, data)
 
     async def delete(self, id: UUID):

@@ -43,6 +43,7 @@ class CohorteUpdate(BaseModel):
     nombre: str | None = None
     carrera_id: uuid.UUID | None = None
     vig_hasta: date | None = None
+    estado: str | None = None
 
 
 class CohorteResponse(BaseModel):
