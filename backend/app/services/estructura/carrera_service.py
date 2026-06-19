@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.estructura.carrera_repository import CarreraRepository
 from app.repositories.estructura.cohorte_repository import CohorteRepository
+from app.repositories.usuarios.asignacion_repository import AsignacionRepository
 
 
 class CarreraService:
@@ -15,6 +16,7 @@ class CarreraService:
         self.tenant_id = tenant_id
         self.repo = CarreraRepository(db, tenant_id)
         self.cohorte_repo = CohorteRepository(db, tenant_id)
+        self.asignacion_repo = AsignacionRepository(db, tenant_id)
 
     async def create(self, data: dict):
         existing = await self.repo.list(codigo=data["codigo"])
@@ -44,6 +46,13 @@ class CarreraService:
                     detail="Cannot deactivate carrera with active cohorts",
                 )
 
+            active = await self.asignacion_repo.tiene_asignaciones_activas_carrera(id)
+            if active:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Cannot deactivate carrera with active asignaciones",
+                )
+
         return await self.repo.update(id, data)
 
     async def delete(self, id: UUID):
@@ -56,6 +65,13 @@ class CarreraService:
             raise HTTPException(
                 status_code=409,
                 detail="Cannot delete carrera with active cohorts",
+            )
+
+        active = await self.asignacion_repo.tiene_asignaciones_activas_carrera(id)
+        if active:
+            raise HTTPException(
+                status_code=409,
+                detail="Cannot delete carrera with active asignaciones",
             )
 
         await self.repo.delete(id)

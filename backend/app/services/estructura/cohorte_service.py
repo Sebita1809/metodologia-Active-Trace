@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.estructura.carrera_repository import CarreraRepository
 from app.repositories.estructura.cohorte_repository import CohorteRepository
+from app.repositories.usuarios.asignacion_repository import AsignacionRepository
 
 
 class CohorteService:
@@ -15,6 +16,7 @@ class CohorteService:
         self.tenant_id = tenant_id
         self.repo = CohorteRepository(db, tenant_id)
         self.carrera_repo = CarreraRepository(db, tenant_id)
+        self.asignacion_repo = AsignacionRepository(db, tenant_id)
 
     async def create(self, data: dict):
         carrera = await self.carrera_repo.get(data["carrera_id"])
@@ -63,4 +65,12 @@ class CohorteService:
         entity = await self.repo.get(id)
         if entity is None:
             raise HTTPException(status_code=404, detail="Cohorte not found")
+
+        active = await self.asignacion_repo.tiene_asignaciones_activas_cohorte(id)
+        if active:
+            raise HTTPException(
+                status_code=409,
+                detail="Cannot delete cohorte with active asignaciones",
+            )
+
         await self.repo.delete(id)

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import EstadoGenerico
 from app.repositories.usuarios.asignacion_repository import AsignacionRepository
+from app.repositories.usuarios.umbral_materia_repository import UmbralMateriaRepository
 from app.repositories.usuarios.usuario_repository import UsuarioRepository
 
 
@@ -16,6 +17,7 @@ class AsignacionService:
         self.tenant_id = tenant_id
         self.repo = AsignacionRepository(db, tenant_id)
         self.usuario_repo = UsuarioRepository(db, tenant_id)
+        self.umbral_repo = UmbralMateriaRepository(db, tenant_id)
 
     async def create(self, data: dict) -> dict:
         # Validate user exists and is active
@@ -59,6 +61,13 @@ class AsignacionService:
         }
 
         entity = await self.repo.create(create_data)
+
+        # Auto-create UmbralMateria for teaching roles
+        rol = data["rol"]
+        materia_id = data.get("materia_id")
+        if rol in ("PROFESOR", "TUTOR") and materia_id:
+            await self.umbral_repo.create_default(entity.id, materia_id)
+
         return self._to_response(entity)
 
     async def get(self, id: uuid.UUID) -> dict:
