@@ -9,7 +9,16 @@ from app.models.rol import Rol
 from app.models.permiso import Permiso
 from app.models.audit_log import AuditLog
 from app.models.rol_permiso import RolPermiso
-from app.models.domain import Asignacion, Carrera, Cohorte, Materia, Usuario
+from app.models.domain import (
+    Asignacion,
+    Carrera,
+    Cohorte,
+    EntradaPadron,
+    Materia,
+    UmbralMateria,
+    Usuario,
+    VersionPadron,
+)
 
 __all__ = [
     "Asignacion",
@@ -25,6 +34,9 @@ __all__ = [
     "AuditLog",
     "Carrera",
     "Cohorte",
+    "EntradaPadron",
     "Materia",
+    "UmbralMateria",
     "Usuario",
+    "VersionPadron",
 ]

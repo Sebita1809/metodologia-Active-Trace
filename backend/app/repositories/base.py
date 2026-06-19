@@ -75,6 +75,22 @@ class BaseRepository(Generic[ModelT]):
         await self.db.commit()
         return True
 
+    async def hard_delete(self, id: UUID) -> bool:
+        """Permanently delete a record (bypasses soft delete).
+        Use ONLY for operations where permanent removal is the explicit intent (e.g., clear subject data).
+        """
+        stmt = select(self.model).where(
+            self.model.id == id,
+            self.model.tenant_id == self.tenant_id,
+        )
+        result = await self.db.execute(stmt)
+        entity = result.scalar_one_or_none()
+        if entity is None:
+            return False
+        await self.db.delete(entity)
+        await self.db.commit()
+        return True
+
     async def get_by_id_without_tenant(self, id: UUID) -> ModelT | None:
         """Bypass tenant scope — use ONLY for admin operations."""
         stmt = select(self.model).where(

@@ -13,6 +13,7 @@ from app.api.v1.routers.equipos import router as equipos_router
 from app.api.v1.routers.health import router as health_router
 from app.api.v1.routers.impersonacion import router as impersonacion_router
 from app.api.v1.routers.materias import router as materias_router
+from app.api.v1.routers.padron import router as padron_router
 from app.api.v1.routers.usuarios import router as usuarios_router
 from app.core.logging import setup_logging
 from app.core.observability import setup_observability
@@ -50,3 +51,4 @@ app.include_router(usuarios_router, prefix="/api/v1")
 app.include_router(asignaciones_router, prefix="/api/v1")
 app.include_router(equipos_router, prefix="/api/v1")
 app.include_router(materias_router, prefix="/api/v1")
+app.include_router(padron_router, prefix="/api/v1")
