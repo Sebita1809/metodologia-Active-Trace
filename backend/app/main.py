@@ -7,6 +7,7 @@ from fastapi import FastAPI
 
 from app.api.v1.routers.auth import router as auth_router
 from app.api.v1.routers.asignaciones import router as asignaciones_router
+from app.api.v1.routers.calificaciones import router as calificaciones_router
 from app.api.v1.routers.carreras import router as carreras_router
 from app.api.v1.routers.cohortes import router as cohortes_router
 from app.api.v1.routers.equipos import router as equipos_router
@@ -51,4 +52,5 @@ app.include_router(usuarios_router, prefix="/api/v1")
 app.include_router(asignaciones_router, prefix="/api/v1")
 app.include_router(equipos_router, prefix="/api/v1")
 app.include_router(materias_router, prefix="/api/v1")
+app.include_router(calificaciones_router, prefix="/api/v1")
 app.include_router(padron_router, prefix="/api/v1")

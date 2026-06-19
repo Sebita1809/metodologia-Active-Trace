@@ -1,6 +1,7 @@
 """Domain model exports for the academic structure module."""
 
 from app.models.domain.asignacion import Asignacion
+from app.models.domain.calificacion import Calificacion
 from app.models.domain.carrera import Carrera
 from app.models.domain.cohorte import Cohorte
 from app.models.domain.entrada_padron import EntradaPadron
@@ -11,6 +12,7 @@ from app.models.domain.version_padron import VersionPadron
 
 __all__ = [
     "Asignacion",
+    "Calificacion",
     "Carrera",
     "Cohorte",
     "EntradaPadron",

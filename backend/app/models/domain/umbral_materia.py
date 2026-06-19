@@ -2,6 +2,7 @@
 import uuid
 
 from sqlalchemy import ForeignKey, Integer, Uuid
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
@@ -17,3 +18,6 @@ class UmbralMateria(BaseModel):
         Uuid, ForeignKey("materia.id", ondelete="CASCADE"), nullable=False
     )
     umbral_pct: Mapped[int] = mapped_column(Integer, nullable=False, default=60)
+    valores_aprobatorios: Mapped[list[str] | None] = mapped_column(
+        JSONB, nullable=True, default=list
+    )
