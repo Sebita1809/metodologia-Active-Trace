@@ -1,0 +1,21 @@
+{
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git diff *": "allow",
+      "git status": "allow",
+      "go build *": "allow",
+      "go test *": "allow",
+      "rm -rf *": "deny",
+      "rm -rf /*": "deny"
+    },
+    "edit": "ask",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "lsp": "allow",
+    "read": "allow",
+    "webfetch": "ask",
+    "websearch": "ask"
+  }
+}

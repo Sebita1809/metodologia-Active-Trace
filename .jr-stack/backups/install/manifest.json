@@ -1,0 +1,49 @@
+{
+  "id": "install",
+  "created_at": "2026-06-10T16:21:46.7451927Z",
+  "root_dir": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.jr-stack\\backups\\install",
+  "entries": [
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.claude\\skills",
+      "snapshot_path": "",
+      "existed": true,
+      "is_dir": true
+    },
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.opencode\\skills",
+      "snapshot_path": "",
+      "existed": false,
+      "is_dir": true
+    },
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.claude\\CLAUDE.md",
+      "snapshot_path": "",
+      "existed": false
+    },
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.opencode\\AGENTS.md",
+      "snapshot_path": "",
+      "existed": false
+    },
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.claude\\settings.json",
+      "snapshot_path": "files/Users/lisan/OneDrive/Escritorio/UTN/Gestion-Metodologia-2026/active-trace/.claude/settings.json",
+      "existed": true,
+      "mode": 438
+    },
+    {
+      "original_path": "C:\\Users\\lisan\\OneDrive\\Escritorio\\UTN\\Gestion-Metodologia-2026\\active-trace\\.opencode\\opencode.json",
+      "snapshot_path": "",
+      "existed": false
+    },
+    {
+      "original_path": "C:\\Users\\lisan\\AppData\\Local\\jr-stack\\bin\\jr-stack.exe",
+      "snapshot_path": "files/Users/lisan/AppData/Local/jr-stack/bin/jr-stack.exe",
+      "existed": true,
+      "mode": 438
+    }
+  ],
+  "file_count": 2,
+  "compressed": true,
+  "checksum": "ecbfe85b20987c600d687ca68215110cede126f279d4697dbcc5b019381e6e04"
+}
